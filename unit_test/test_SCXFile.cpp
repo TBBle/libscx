@@ -2,7 +2,7 @@
                            // this in one cpp file
 #include "catch.hpp"
 
-#include "libscx.hpp"
+#include "scx.hpp"
 
 #include <cstring>
 using std::memcmp;
