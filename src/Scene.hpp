@@ -1,8 +1,8 @@
-#include <cstdint>
+#include <array>
 #include <string>
 #include <utility>
 
-#include <boost/array.hpp>
+#include <cstdint>
 
 struct Scene {
  public:
@@ -22,12 +22,12 @@ struct Scene {
   std::uint16_t unk2;
   std::uint16_t chapterJump;
   std::uint16_t sceneJump1;
-  boost::array<std::uint8_t, 0x30> sceneJumpInfo1;
+  std::array<std::uint8_t, 0x30> sceneJumpInfo1;
   std::uint16_t sceneJump2;
-  boost::array<std::uint8_t, 0x30> sceneJumpInfo2;
+  std::array<std::uint8_t, 0x30> sceneJumpInfo2;
   std::uint16_t sceneJump3;
-  boost::array<std::uint8_t, 0x30> sceneJumpInfo3;
+  std::array<std::uint8_t, 0x30> sceneJumpInfo3;
   std::uint16_t sceneJump4;
-  boost::array<std::uint8_t, 0x30> sceneJumpInfo4;
+  std::array<std::uint8_t, 0x30> sceneJumpInfo4;
   std::uint32_t unk3;
 };

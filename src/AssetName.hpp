@@ -1,5 +1,6 @@
-#include <cstdint>
 #include <string>
+
+#include <cstdint>
 
 struct AssetName {
  public:

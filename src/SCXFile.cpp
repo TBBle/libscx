@@ -1,6 +1,5 @@
 #include "SCXFile.hpp"
 
-#include <iostream>
 #include <string>
 using std::string;
 #include <utility>
@@ -8,7 +7,6 @@ using std::make_pair;
 #include <vector>
 using std::vector;
 
-#include <cstdlib>
 #include <cstddef>
 using std::size_t;
 #include <cstring>

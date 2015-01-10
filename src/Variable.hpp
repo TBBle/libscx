@@ -1,7 +1,7 @@
-#include <cstdint>
+#include <array>
 #include <string>
 
-#include <boost/array.hpp>
+#include <cstdint>
 
 struct Variable {
  public:
@@ -15,5 +15,5 @@ struct Variable {
   // utf-8 encoded
   std::string name;
   std::string comment;
-  boost::array<std::uint8_t, 0xc> info_blob;
+  std::array<std::uint8_t, 0xc> info_blob;
 };

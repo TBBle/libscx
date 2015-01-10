@@ -1,14 +1,24 @@
 #include "Table1Data.hpp"
 
-#include <boost/array.hpp>
 #include <boost/locale.hpp>
+using boost::locale::conv::to_utf;
 
-std::size_t Table1Data::read_data(const std::uint8_t* pStringData) {
-  boost::array<char, 0x21> buffer;
+#include <array>
+using std::array;
+
+#include <cstring>
+using std::memcpy;
+#include <cstddef>
+using std::size_t;
+#include <cstdint>
+using std::uint8_t;
+
+size_t Table1Data::read_data(const uint8_t* pStringData) {
+  array<char, 0x21> buffer;
   buffer[0x20] = '\0';
 
-  std::memcpy(&buffer[0], pStringData, 0x20);
-  data = boost::locale::conv::to_utf<char>(&buffer[0], "CP932");
+  memcpy(&buffer[0], pStringData, 0x20);
+  data = to_utf<char>(&buffer[0], "CP932");
 
   return 0x20;
 }
