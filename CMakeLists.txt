@@ -22,6 +22,7 @@ add_library(scx
 	src/AssetName.hpp
 	src/AssetName.cpp
 	src/Scene.hpp
+	src/Scene.cpp
 	src/Table1Data.hpp
 	src/Table1Data.cpp
 	src/Variable.hpp

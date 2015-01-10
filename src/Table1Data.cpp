@@ -8,7 +8,7 @@ std::size_t Table1Data::read_data(const std::uint8_t* pStringData) {
   buffer[0x20] = '\0';
 
   std::memcpy(&buffer[0], pStringData, 0x20);
-  data = boost::locale::conv::to_utf<char>(&buffer[0], "SJIS");
+  data = boost::locale::conv::to_utf<char>(&buffer[0], "CP932");
 
   return 0x20;
 }

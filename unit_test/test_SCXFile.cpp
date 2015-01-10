@@ -4,6 +4,9 @@
 
 #include "scx.hpp"
 
+#include <string>
+using std::string;
+
 #include <cstring>
 using std::memcmp;
 
@@ -29,6 +32,121 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(scxfile.se_count() == 191);
   REQUIRE(scxfile.bgm_count() == 33);
   REQUIRE(scxfile.voice_count() == 24454);
+
+  const uint8_t nullSceneBlob[] = {
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+  const Scene& scene0 = scxfile.scene(0);
+  REQUIRE(scene0.text == u8"");
+  REQUIRE(scene0.chapter == 0);
+  REQUIRE(scene0.scene == 0);
+  REQUIRE(scene0.command == 0);
+  REQUIRE(scene0.unk1 == 0);
+  REQUIRE(scene0.unk2 == 0xffff);
+  REQUIRE(scene0.chapterJump == 0xffff);
+  REQUIRE(scene0.sceneJump1 == 0xffff);
+  REQUIRE(memcmp(&scene0.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene0.sceneJump2 == 0xffff);
+  REQUIRE(memcmp(&scene0.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene0.sceneJump3 == 0xffff);
+  REQUIRE(memcmp(&scene0.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene0.sceneJump4 == 25);
+  REQUIRE(memcmp(&scene0.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene0.unk3 == 0x00000000);
+
+  const Scene& scene1 = scxfile.scene(1);
+  REQUIRE(scene1.text == u8"[\\w,2,=,2,+,-2][\\w,589,=,-1]");
+  REQUIRE(scene1.chapter == 0);
+  REQUIRE(scene1.scene == 1);
+  REQUIRE(scene1.command == 0);
+  REQUIRE(scene1.unk1 == 0);
+  REQUIRE(scene1.unk2 == 0xffff);
+  REQUIRE(scene1.chapterJump == 0xffff);
+  REQUIRE(scene1.sceneJump1 == 0xffff);
+  REQUIRE(memcmp(&scene1.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene1.sceneJump2 == 0xffff);
+  REQUIRE(memcmp(&scene1.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene1.sceneJump3 == 16);
+  REQUIRE(memcmp(&scene1.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene1.sceneJump4 == 0xffff);
+  REQUIRE(memcmp(&scene1.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene1.unk3 == 0x00000000);
+
+  const Scene& scene14500 = scxfile.scene(14500);
+
+  const string scene14500Text =
+      u8"[\\m,1,4][\\b,0,19][\\e,21,-2][\\c,0,15][\\c,3,15]"
+      u8"「あ〜どもども。お嬢様、おひさしブリブリ〜」[\\r]"
+      "[\\c,2,829][\\c,3,829]"
+      "「うむ、無沙汰をしておったな、轟よ。渡したⅰポットンは役に立っておるのか"
+      "？」[\\r]"
+      "[\\c,3,15]"
+      "「もっちろんですよ〜これさえあれば、どんな危険な任務もらっくらくって感じ"
+      "〜」[\\r]"
+      "[\\c,3,829]"
+      "「ふむ、ならば良い。それより今日はそなたに尋ねたいことがあるのじゃ」["
+      "\\r]"
+      "[\\c,3,15]"
+      "「僕にですかぁ〜？　光栄だなぁ〜。なんでも聞いてくださいよ〜」["
+      "\\r]"
+      "[\\c,3,829]「うむ。では尋ねるが…轟はＳＭというものを知っておるか？」["
+      "\\r]"
+      "[\\c,0,723][\\c,3,723]"
+      "「えええＳＭううう〜！？　なな、なんでそんなことを？」[\\r]"
+      "[\\c,3,829]"
+      "「うむ。実はちと仕事の為に資料が必要になっての。ＳＭについて調べておるの"
+      "じゃ」[\\r]"
+      "[\\c,3,723]「は、はぁ…仕事の為ですか…びっくりしたぁ〜…」[\\r]"
+      "[\\c,3,829]「それよりどうなのじゃ？　知っておるのか、いないのか？」[\\r]"
+      "[\\c,0,724][\\c,3,724]"
+      "「あ、え〜とですねぇ、僕より詳しい専門家がいるんで、その人に聞くのがいい"
+      "かとぉ」[\\r]"
+      "[\\c,3,829]「ほほう…それはなかなか興味深い人物じゃな」[\\r]"
+      "[\\c,0,15][\\c,3,15]「ええ。それじゃさっそく河川敷に行きましょう」[\\r]"
+      "[\\c,3,829]「河川敷？　その人物はそんなとこに住んでおるのか？」[\\r]"
+      "[\\c,3,15]「違いますよ〜。でもいっつもそこに立ってるんです」[\\r]"
+      "[\\c,3,829]「ふむ…。ではすぐに訪ねてみよう」[\\r]"
+      "[\\c,3,15]「は〜い」[\\r]"
+      "[\\c,5]";
+
+  REQUIRE(scene14500.text.size() == scene14500Text.size());
+  REQUIRE(scene14500.text == scene14500Text);
+  REQUIRE(scene14500.chapter == 345);
+  REQUIRE(scene14500.scene == 1);
+  REQUIRE(scene14500.command == 0);
+  REQUIRE(scene14500.unk1 == 0);
+  REQUIRE(scene14500.unk2 == 0xffff);
+  REQUIRE(scene14500.chapterJump == 0xffff);
+  REQUIRE(scene14500.sceneJump1 == 0xffff);
+  REQUIRE(memcmp(&scene14500.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene14500.sceneJump2 == 0xffff);
+  REQUIRE(memcmp(&scene14500.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene14500.sceneJump3 == 2);
+  REQUIRE(memcmp(&scene14500.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene14500.sceneJump4 == 0xffff);
+  REQUIRE(memcmp(&scene14500.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene14500.unk3 == 0x00000000);
+
+  const Scene& scene16912 = scxfile.scene(16912);
+  REQUIRE(scene16912.text == u8"[\\e,14,675,-1][\\w,771,=,-4]");
+  REQUIRE(scene16912.chapter == 473);
+  REQUIRE(scene16912.scene == 53);
+  REQUIRE(scene16912.command == 0);
+  REQUIRE(scene16912.unk1 == 0);
+  REQUIRE(scene16912.unk2 == 0xffff);
+  REQUIRE(scene16912.chapterJump == 0xffff);
+  REQUIRE(scene16912.sceneJump1 == 0xffff);
+  REQUIRE(memcmp(&scene16912.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene16912.sceneJump2 == 32);
+  REQUIRE(memcmp(&scene16912.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene16912.sceneJump3 == 0xffff);
+  REQUIRE(memcmp(&scene16912.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene16912.sceneJump4 == 0xffff);
+  REQUIRE(memcmp(&scene16912.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(scene16912.unk3 == 0x00000000);
 
   const Table1Data& table1_0 = scxfile.table1(0);
   REQUIRE(table1_0.data == u8"ゲームメイン・ゲームパート");
@@ -77,6 +195,8 @@ TEST_CASE("Load the original avking SCX file") {
   const uint8_t var1Blob[] = {0x10, 0x00, 0x64, 0x00, 0x64, 0x00,
                               0x00, 0x00, 0x30, 0x75, 0xff, 0xff};
 
+  // TODO: Check a string with the character U+2170 SMALL ROMAN NUMERAL ONE
+  // which is in the data as FA 40
   REQUIRE(var1.name == u8"基本ステータス・所持金");
   REQUIRE(var1.comment == u8"");
   REQUIRE(memcmp(&var1.info_blob[0], var1Blob, 0x0c) == 0);

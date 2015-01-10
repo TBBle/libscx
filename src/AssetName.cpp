@@ -17,10 +17,10 @@ size_t AssetName::read_data(const uint8_t* pStringData) {
   buffer[0x20] = '\0';
 
   memcpy(&buffer[0], pStringData, 0x20);
-  name = to_utf<char>(&buffer[0], "SJIS");
+  name = to_utf<char>(&buffer[0], "CP932");
 
   memcpy(&buffer[0], pStringData + 0x20, 0x20);
-  abbreviation = to_utf<char>(&buffer[0], "SJIS");
+  abbreviation = to_utf<char>(&buffer[0], "CP932");
 
   return 0x40;
 }
