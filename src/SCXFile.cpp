@@ -146,7 +146,7 @@ bool SCXFile::read(string fileName) {
         // Decrypt
         size_t dataOffset = i - 8;
         uint8_t key = ENCRYPTION_KEY[dataOffset % sizeof(ENCRYPTION_KEY)];
-        key += dataOffset;
+        key += static_cast<uint8_t>(dataOffset);
         buffer[i] ^= key;
     }
 
@@ -199,9 +199,9 @@ bool SCXFile::read(string fileName) {
     uint32_t scene_string_offsets = 0x44;
 
     // This is a table of 0xd8-byte scene blobs
-    uint32_t scene_blobs_offset = 0x44 + 0x04 * scenes_.size();
+    uint32_t scene_blobs_offset = 0x44 + 0x04 * static_cast<uint32_t>(scenes_.size());
     // This is a table of 0xc-byte variable info blobs
-    uint32_t variable_blobs_offset = scene_blobs_offset + 0xd8 * scenes_.size();
+    uint32_t variable_blobs_offset = scene_blobs_offset + 0xd8 * static_cast<uint32_t>(scenes_.size());
 
     if (!read_variable_data<0xd8>(scenes_, buffer, scene_string_offsets,
                                   scene_blobs_offset))
