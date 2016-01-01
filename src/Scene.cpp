@@ -1,4 +1,4 @@
-#include "Scene.hpp"
+﻿#include "Scene.hpp"
 
 #include <boost/locale.hpp>
 using boost::locale::conv::to_utf;
@@ -35,6 +35,7 @@ pair<size_t, size_t> Scene::read_data(const uint8_t* pStringData,
   // UTF-8, but was able to encode it _to_ UTF-8
   // boost::locale came up with 〜 'WAVE DASH' (U+301C) where Python output ～
   // 'FULLWIDTH TILDE' (U+FF5E)
+  // It's worse than that. boost::locale under MSVC2015 produces U+FF5E.
 
   string cp932data;
   if (pStringData != 0) {
