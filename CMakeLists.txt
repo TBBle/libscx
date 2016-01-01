@@ -1,7 +1,16 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.4.1 FATAL_ERROR)
 
-project(scx)
+project(scx CXX)
 enable_testing()
+
+# Globally C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Unicode for MSVC
+if(MSVC)
+	add_definitions(-DUNICODE -D_UNICODE)
+endif()
 
 # QT 5
 #set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -9,8 +18,13 @@ enable_testing()
 #find_package(Qt5Core)
 
 # Boost
-find_package(Boost REQUIRED COMPONENTS locale)
-include_directories(${Boost_INCLUDE_DIRS})
+if(MSVC)
+	# Boost headers use #pragma link for MSVC, giving the
+	# static library names. So just go with it...
+	set(Boost_USE_STATIC_LIBS ON)
+endif()
+find_package(Boost REQUIRED COMPONENTS date_time locale)
+#add_definitions("${Boost_LIB_DIAGNOSTIC_DEFINITIONS}")
 
 # Our own stuff
 include_directories("${PROJECT_SOURCE_DIR}/src")
@@ -29,12 +43,14 @@ add_library(scx
 	src/Variable.cpp
 )
 
-target_link_libraries(scx ${Boost_LIBRARIES})
+target_include_directories(scx PUBLIC ${Boost_INCLUDE_DIRS})
+target_link_libraries(scx PUBLIC ${Boost_LIBRARIES})
 
-# CMake 3.1 onwards
-#set_property(TARGET scx PROPERTY CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
-# CMake 3.0 or earlier
-add_definitions(-std=c++11)
+# This didn't work...
+# http://stackoverflow.com/a/20165220 for reference
+#set_property(TARGET scx
+#	PROPERTY CXX_STANDARD 11
+#	PROPERTY CXX_STANDARD_REQUIRED ON)
 
 add_executable(test_scx
 	unit_test/catch.hpp
