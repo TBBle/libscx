@@ -28,21 +28,35 @@ void buffcopy(T& output, const uint8_t* pBuffer, size_t offset) {
 
 pair<size_t, size_t> Scene::read_data(const uint8_t* pStringData,
                                       const uint8_t* pBlobData) {
-  // String is null-terminated and encoded in CP932
-
-  // Differences compared to Python's CP932 support:
-  // Python's CP932 cannot encode ⅰ 'SMALL ROMAN NUMERAL ONE' (U+2170) from
-  // UTF-8, but was able to encode it _to_ UTF-8
-  // boost::locale came up with 〜 'WAVE DASH' (U+301C) where Python output ～
-  // 'FULLWIDTH TILDE' (U+FF5E)
-  // It's worse than that. boost::locale under MSVC2015 produces U+FF5E.
+  // String is null-terminated and encoded in Windows code-page 932, which
+  // is known as "Shift_JIS" only within the MS API, and as "CP932" everywhere
+  // except non-Windows ICU. msys2's mingw64 build of boost appears to be
+  // using non-Windows ICU as its backend, so we can't use that name.
+  // After much experimentation, it appears both the WindowsAPI-backed
+  // boost::locale::conv in Visual Studio, and the ICU-backed version in
+  // msys2's mingw64, agree on "windows-932".
+  // http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT
+  // https://msdn.microsoft.com/en-us/goglobal/cc305152.aspx
+  // http://demo.icu-project.org/icu-bin/convexp?conv=ibm-943_P15A-2003&s=ALL
+  // There's only four characters which give different results between the
+  // two code-pages per http://hp.vector.co.jp/authors/VA003720/lpproj/test/cp932sj.htm
+  // Shift-JIS => CP932 vs SHIFT-JIS
+  // 0x815c => U+2015 HORIZONTAL BAR (―) vs U+2015 EM DASH (—)
+  // 0x8160 => U+FF5E FULLWIDTH TILDE (～) vs U+301C WAVE DASH (〜)
+  // 0x8161 => U+2225 PARALLEL TO (∥) vs U+2016 DOUBLE VERTICAL LINE (‖)
+  // 0x817c => U+FF0D FULLWIDTH HYPHEN-MINUS (－) vs U+2212 MINUS SIGN (−)
+  // 0x8160 shows up in the unit tests, which will catch platform issues.
+  // Note that some characters (including) U+2170 SMALL ROMAN NUMERAL ONE (ⅰ)
+  // have multiple representations in CP932, so the following non-round trips
+  // may occur: https://support.microsoft.com/en-us/kb/170559 according to
+  // http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WindowsBestFit/bestfit932.txt
 
   string cp932data;
   if (pStringData != 0) {
     while (*pStringData != '\0') {
       cp932data.push_back(*pStringData++);
     }
-    text = to_utf<char>(cp932data, "CP932");
+	text = to_utf<char>(cp932data, "windows-932");
   }
 
   buffcopy(chapter, pBlobData, 0);
