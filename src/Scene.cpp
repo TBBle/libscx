@@ -11,20 +11,12 @@ using std::string;
 using std::pair;
 using std::make_pair;
 
-#include <cstring>
-using std::memcpy;
 #include <cstddef>
 using std::size_t;
 #include <cstdint>
 using std::uint8_t;
 
-namespace {
-
-template <typename T>
-void buffcopy(T& output, const uint8_t* pBuffer, size_t offset) {
-  memcpy(&output, pBuffer + offset, sizeof(T));
-}
-}
+#include "buffutils.hpp"
 
 size_t Scene::read_data(gsl::czstring<> cp932text,
                         gsl::span<uint8_t, 0xd8> data) {
@@ -60,21 +52,21 @@ size_t Scene::read_data(gsl::czstring<> cp932text,
     text = to_utf<char>(cp932data, "windows-932");
   }
 
-  buffcopy(chapter, data.data(), 0);
-  buffcopy(scene, data.data(), 2);
-  buffcopy(command, data.data(), 4);
-  buffcopy(unk1, data.data(), 6);
-  buffcopy(unk2, data.data(), 8);
-  buffcopy(chapterJump, data.data(), 10);
-  buffcopy(sceneJump1, data.data(), 12);
-  buffcopy(sceneJump2, data.data(), 14);
-  buffcopy(sceneJump3, data.data(), 16);
-  buffcopy(sceneJump4, data.data(), 18);
-  memcpy(sceneJumpInfo1.data(), data.data() + 20, 48);
-  memcpy(sceneJumpInfo2.data(), data.data() + 68, 48);
-  memcpy(sceneJumpInfo3.data(), data.data() + 116, 48);
-  memcpy(sceneJumpInfo4.data(), data.data() + 164, 48);
-  buffcopy(unk3, data.data(), 212);
+  chapter = buffutils::get<uint16_t>(data, 0);
+  scene = buffutils::get<uint16_t>(data, 2);
+  command = buffutils::get<uint16_t>(data, 4);
+  unk1 = buffutils::get<uint16_t>(data, 6);
+  unk2 = buffutils::get<uint16_t>(data, 8);
+  chapterJump = buffutils::get<uint16_t>(data, 10);
+  sceneJump1 = buffutils::get<uint16_t>(data, 12);
+  sceneJump2 = buffutils::get<uint16_t>(data, 14);
+  sceneJump3 = buffutils::get<uint16_t>(data, 16);
+  sceneJump4 = buffutils::get<uint16_t>(data, 18);
+  buffutils::copy(data, 20, sceneJumpInfo1);
+  buffutils::copy(data, 68, sceneJumpInfo2);
+  buffutils::copy(data, 116, sceneJumpInfo3);
+  buffutils::copy(data, 164, sceneJumpInfo3);
+  unk3 = buffutils::get<uint16_t>(data, 212);
 
   return cp932text ? cp932data.size() + 1 : 0;
 }
