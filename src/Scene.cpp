@@ -53,7 +53,7 @@ pair<size_t, size_t> Scene::read_data(const uint8_t* pStringData,
   // http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WindowsBestFit/bestfit932.txt
 
   string cp932data;
-  if (pStringData != 0) {
+  if (pStringData != nullptr) {
     while (*pStringData != '\0') {
       cp932data.push_back(*pStringData++);
     }
