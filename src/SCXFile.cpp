@@ -88,11 +88,11 @@ bool read_variable_data(vector<TwoParamDataT>& dataToFill,
   for (size_t i = 0; i < dataToFill.size(); ++i) {
     // TODO: Check string size result
     const uint32_t& stringOffset = stringOffsets[i];
-    if (dataToFill[i]
-            .read_data((stringOffset == 0 ? NULL : &buffer[stringOffset]),
-                       &buffer[offset2 + dataSize * i])
-            .second != dataSize)
-      return false;
+    dataToFill[i].read_data(
+        (stringOffset == 0 ? nullptr : reinterpret_cast<const char*>(
+                                           &buffer[stringOffset])),
+        gsl::span<uint8_t, dataSize>(&buffer[offset2 + dataSize * i],
+                                     dataSize));
   }
   return true;
 }
@@ -235,8 +235,8 @@ bool SCXFile::read(string fileName) {
   uint32_t variable_blobs_offset =
       scene_blobs_offset + scene_blob_size * header.scene_count;
 
-  if (!read_variable_data<scene_blob_size>(scenes_, buffer, scene_string_offsets,
-                                scene_blobs_offset))
+  if (!read_variable_data<scene_blob_size>(
+          scenes_, buffer, scene_string_offsets, scene_blobs_offset))
     return false;
 
   if (!read_fixed_data<0x20>(table1_, buffer, table1_strings_offset))

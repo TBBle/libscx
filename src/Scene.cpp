@@ -26,8 +26,8 @@ void buffcopy(T& output, const uint8_t* pBuffer, size_t offset) {
 }
 }
 
-pair<size_t, size_t> Scene::read_data(const uint8_t* pStringData,
-                                      const uint8_t* pBlobData) {
+size_t Scene::read_data(gsl::czstring<> cp932text,
+                        gsl::span<uint8_t, 0xd8> data) {
   // String is null-terminated and encoded in Windows code-page 932, which
   // is known as "Shift_JIS" only within the MS API, and as "CP932" everywhere
   // except non-Windows ICU. msys2's mingw64 build of boost appears to be
@@ -53,28 +53,28 @@ pair<size_t, size_t> Scene::read_data(const uint8_t* pStringData,
   // http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WindowsBestFit/bestfit932.txt
 
   string cp932data;
-  if (pStringData != nullptr) {
-    while (*pStringData != '\0') {
-      cp932data.push_back(*pStringData++);
+  if (cp932text != nullptr) {
+    while (*cp932text != '\0') {
+      cp932data.push_back(*cp932text++);
     }
     text = to_utf<char>(cp932data, "windows-932");
   }
 
-  buffcopy(chapter, pBlobData, 0);
-  buffcopy(scene, pBlobData, 2);
-  buffcopy(command, pBlobData, 4);
-  buffcopy(unk1, pBlobData, 6);
-  buffcopy(unk2, pBlobData, 8);
-  buffcopy(chapterJump, pBlobData, 10);
-  buffcopy(sceneJump1, pBlobData, 12);
-  buffcopy(sceneJump2, pBlobData, 14);
-  buffcopy(sceneJump3, pBlobData, 16);
-  buffcopy(sceneJump4, pBlobData, 18);
-  memcpy(sceneJumpInfo1.data(), pBlobData + 20, 48);
-  memcpy(sceneJumpInfo2.data(), pBlobData + 68, 48);
-  memcpy(sceneJumpInfo3.data(), pBlobData + 116, 48);
-  memcpy(sceneJumpInfo4.data(), pBlobData + 164, 48);
-  buffcopy(unk3, pBlobData, 212);
+  buffcopy(chapter, data.data(), 0);
+  buffcopy(scene, data.data(), 2);
+  buffcopy(command, data.data(), 4);
+  buffcopy(unk1, data.data(), 6);
+  buffcopy(unk2, data.data(), 8);
+  buffcopy(chapterJump, data.data(), 10);
+  buffcopy(sceneJump1, data.data(), 12);
+  buffcopy(sceneJump2, data.data(), 14);
+  buffcopy(sceneJump3, data.data(), 16);
+  buffcopy(sceneJump4, data.data(), 18);
+  memcpy(sceneJumpInfo1.data(), data.data() + 20, 48);
+  memcpy(sceneJumpInfo2.data(), data.data() + 68, 48);
+  memcpy(sceneJumpInfo3.data(), data.data() + 116, 48);
+  memcpy(sceneJumpInfo4.data(), data.data() + 164, 48);
+  buffcopy(unk3, data.data(), 212);
 
-  return make_pair(pStringData ? cp932data.size() + 1 : 0, 216);
+  return cp932text ? cp932data.size() + 1 : 0;
 }

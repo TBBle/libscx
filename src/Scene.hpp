@@ -4,11 +4,14 @@
 
 #include <cstdint>
 
+#include <gsl.h>
+
 struct Scene {
  public:
   // Reading API
-  std::pair<size_t, size_t> read_data(const std::uint8_t* pStringData,
-                                      const std::uint8_t* pBlobData);
+  // Returns the number of bytes read from the string, including the terminating
+  // '\0'
+  size_t read_data(gsl::czstring<> cp932text, gsl::span<uint8_t, 0xd8> data);
   // Writing API: Not ready yet.
   std::size_t stringSize() const;
   std::size_t write_data(std::uint8_t* pStringData,

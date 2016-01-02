@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.4.1 FATAL_ERROR)
 project(scx CXX)
 enable_testing()
 
-# Globally C++11
-set(CMAKE_CXX_STANDARD 11)
+# Globally C++14
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Unicode for MSVC
@@ -46,10 +46,12 @@ add_library(scx
 target_include_directories(scx PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(scx PUBLIC ${Boost_LIBRARIES})
 
+target_include_directories(scx PUBLIC gsl)
+
 # This didn't work...
 # http://stackoverflow.com/a/20165220 for reference
 #set_property(TARGET scx
-#	PROPERTY CXX_STANDARD 11
+#	PROPERTY CXX_STANDARD 14
 #	PROPERTY CXX_STANDARD_REQUIRED ON)
 
 add_executable(test_scx
