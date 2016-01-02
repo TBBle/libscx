@@ -39,7 +39,8 @@ pair<size_t, size_t> Scene::read_data(const uint8_t* pStringData,
   // https://msdn.microsoft.com/en-us/goglobal/cc305152.aspx
   // http://demo.icu-project.org/icu-bin/convexp?conv=ibm-943_P15A-2003&s=ALL
   // There's only four characters which give different results between the
-  // two code-pages per http://hp.vector.co.jp/authors/VA003720/lpproj/test/cp932sj.htm
+  // two code-pages per
+  // http://hp.vector.co.jp/authors/VA003720/lpproj/test/cp932sj.htm
   // Shift-JIS => CP932 vs SHIFT-JIS
   // 0x815c => U+2015 HORIZONTAL BAR (―) vs U+2015 EM DASH (—)
   // 0x8160 => U+FF5E FULLWIDTH TILDE (～) vs U+301C WAVE DASH (〜)
@@ -56,7 +57,7 @@ pair<size_t, size_t> Scene::read_data(const uint8_t* pStringData,
     while (*pStringData != '\0') {
       cp932data.push_back(*pStringData++);
     }
-	text = to_utf<char>(cp932data, "windows-932");
+    text = to_utf<char>(cp932data, "windows-932");
   }
 
   buffcopy(chapter, pBlobData, 0);
