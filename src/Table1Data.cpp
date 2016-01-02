@@ -18,7 +18,7 @@ size_t Table1Data::read_data(const uint8_t* pStringData) {
   buffer[0x20] = '\0';
 
   memcpy(&buffer[0], pStringData, 0x20);
-  data = to_utf<char>(&buffer[0], "CP932");
+  data = to_utf<char>(&buffer[0], "windows-932");
 
   return 0x20;
 }

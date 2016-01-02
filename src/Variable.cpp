@@ -22,10 +22,10 @@ pair<size_t, size_t> Variable::read_data(const uint8_t* pStringData,
   buffer[0x20] = '\0';
 
   memcpy(&buffer[0], pStringData, 0x20);
-  comment = to_utf<char>(&buffer[0], "CP932");
+  comment = to_utf<char>(&buffer[0], "windows-932");
 
   memcpy(&buffer[0], pStringData + 0x20, 0x20);
-  name = to_utf<char>(&buffer[0], "CP932");
+  name = to_utf<char>(&buffer[0], "windows-932");
 
   memcpy(&info_blob[0], pBlobData, 0x0c);
 
