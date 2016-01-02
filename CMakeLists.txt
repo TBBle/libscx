@@ -53,10 +53,10 @@ target_link_libraries(scx PUBLIC ${Boost_LIBRARIES})
 #	PROPERTY CXX_STANDARD_REQUIRED ON)
 
 add_executable(test_scx
-	unit_test/catch.hpp
-
 	unit_test/test_SCXFile.cpp
 )
+
+target_include_directories(test_scx PRIVATE catch)
 
 target_link_libraries(test_scx scx)
 
