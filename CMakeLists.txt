@@ -41,6 +41,9 @@ add_library(scx
 	src/Table1Data.cpp
 	src/Variable.hpp
 	src/Variable.cpp
+
+	# Utility templates
+	src/buffutils.hpp
 )
 
 target_include_directories(scx PUBLIC ${Boost_INCLUDE_DIRS})

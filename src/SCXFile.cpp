@@ -17,6 +17,8 @@ using std::uint8_t;
 using std::int8_t;
 using std::uint32_t;
 
+#include "buffutils.hpp"
+
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 using namespace boost::interprocess;
@@ -24,12 +26,6 @@ using namespace boost::interprocess;
 namespace {
 
 // All data is little-endian
-template <typename T>
-void buffcopy(T& output, const vector<uint8_t>& buffer, size_t offset) {
-  assert(offset + sizeof(T) <= buffer.size());
-  memcpy(&output, &buffer[offset], sizeof(T));
-}
-
 // Not encrypted
 struct SCXFileIdentifier {
   const static size_t size = 0x08;
@@ -67,17 +63,9 @@ struct SCXFileHeader {
 static_assert(sizeof(SCXFileHeader) == SCXFileHeader::size,
               "SCXFileHeader did not pack correctly");
 
-template <typename T>
-T get(const vector<uint8_t>& buffer) {
-  assert(T::offset + T::size <= buffer.size());
-  T result;
-  buffcopy<T>(result, buffer, T::offset);
-  return result;
-}
-
 template <size_t dataSize, class TwoParamDataT>
 bool read_variable_data(vector<TwoParamDataT>& dataToFill,
-                        vector<uint8_t>& buffer, uint32_t offset1,
+                        buffutils::dynbuffer buffer, uint32_t offset1,
                         uint32_t offset2) {
   vector<uint32_t> stringOffsets;
 
@@ -98,8 +86,8 @@ bool read_variable_data(vector<TwoParamDataT>& dataToFill,
 }
 
 template <size_t dataSize, class OneParamDataT>
-bool read_fixed_data(vector<OneParamDataT>& dataToFill, vector<uint8_t>& buffer,
-                     uint32_t offset) {
+bool read_fixed_data(vector<OneParamDataT>& dataToFill,
+                     buffutils::dynbuffer buffer, uint32_t offset) {
   for (size_t i = 0; i < dataToFill.size(); ++i) {
     if (dataToFill[i].read_data(&buffer[offset + dataSize * i]) != dataSize)
       return false;
@@ -108,8 +96,9 @@ bool read_fixed_data(vector<OneParamDataT>& dataToFill, vector<uint8_t>& buffer,
 }
 
 template <size_t data1Size, size_t data2Size, class TwoParamDataT>
-bool read_fixed_data(vector<TwoParamDataT>& dataToFill, vector<uint8_t>& buffer,
-                     uint32_t offset1, uint32_t offset2) {
+bool read_fixed_data(vector<TwoParamDataT>& dataToFill,
+                     buffutils::dynbuffer buffer, uint32_t offset1,
+                     uint32_t offset2) {
   for (size_t i = 0; i < dataToFill.size(); ++i) {
     if (dataToFill[i].read_data(&buffer[offset1 + data1Size * i],
                                 &buffer[offset2 + data2Size * i]) !=
@@ -177,10 +166,12 @@ bool SCXFile::read(string fileName) {
   size_t size = region.get_size();
 
   // TODO: Consider boost::asio::buffer for this instead
-  vector<uint8_t> buffer(reinterpret_cast<uint8_t*>(addr),
-                         reinterpret_cast<uint8_t*>(addr) + size);
+  vector<uint8_t> storage(reinterpret_cast<uint8_t*>(addr),
+                          reinterpret_cast<uint8_t*>(addr) + size);
 
-  SCXFileIdentifier ident = get<SCXFileIdentifier>(buffer);
+  buffutils::dynbuffer buffer(storage);
+
+  SCXFileIdentifier ident = buffutils::get<SCXFileIdentifier>(buffer);
 
   if (memcmp(&ident.fileprefix, "scx\0", 4)) {
     return false;
@@ -188,7 +179,7 @@ bool SCXFile::read(string fileName) {
 
   // Routine at 0x4352a0 in the binary does the checksum and decrypting
   uint32_t calc = 0;
-  for (size_t i = 8; i < buffer.size(); ++i) {
+  for (ptrdiff_t i = 8; i < buffer.size(); ++i) {
     // Checksum
     calc += int8_t(buffer[i]);
     // Decrypt
@@ -203,7 +194,7 @@ bool SCXFile::read(string fileName) {
   }
 
   // For now, we're copying data, to avoid alignment issues
-  SCXFileHeader header = get<SCXFileHeader>(buffer);
+  SCXFileHeader header = buffutils::get<SCXFileHeader>(buffer);
 
   scenes_.resize(header.scene_count);
   table1_.resize(header.table1_count);
