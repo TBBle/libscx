@@ -23,10 +23,56 @@ using namespace boost::interprocess;
 
 namespace {
 
+// All data is little-endian
 template <typename T>
-void buffcopy(T& output, vector<uint8_t>& buffer, size_t offset) {
-  // assert offset + sizeof(T) <= buffer.size();
+void buffcopy(T& output, const vector<uint8_t>& buffer, size_t offset) {
+  assert(offset + sizeof(T) <= buffer.size());
   memcpy(&output, &buffer[offset], sizeof(T));
+}
+
+// Not encrypted
+struct SCXFileIdentifier {
+  const static size_t size = 0x08;
+  const static size_t offset = 0x0;
+
+  char fileprefix[4];  // "scx\0"
+  uint32_t checksum;
+};
+
+static_assert(sizeof(SCXFileIdentifier) == SCXFileIdentifier::size,
+              "SCXFileIdentifier did not pack correctly");
+
+// All following data is encrupted
+struct SCXFileHeader {
+  const static size_t size = 0x3c;
+  const static size_t offset = 0x08;
+
+  uint32_t scene_count;
+  uint32_t table1_count;
+  uint32_t variable_count;
+  uint32_t BG_count;
+  uint32_t CHR_count;
+  uint32_t SE_count;
+  uint32_t BGM_count;
+  uint32_t VOICE_count;
+  uint32_t table1_strings_offset;
+  uint32_t variable_names_offset;
+  uint32_t BG_names_offset;
+  uint32_t CHR_names_offset;
+  uint32_t SE_names_offset;
+  uint32_t BGM_names_offset;
+  uint32_t VOICE_names_offset;
+};
+
+static_assert(sizeof(SCXFileHeader) == SCXFileHeader::size,
+              "SCXFileHeader did not pack correctly");
+
+template <typename T>
+T get(const vector<uint8_t>& buffer) {
+  assert(T::offset + T::size <= buffer.size());
+  T result;
+  buffcopy<T>(result, buffer, T::offset);
+  return result;
 }
 
 template <size_t dataSize, class TwoParamDataT>
@@ -72,11 +118,11 @@ bool read_fixed_data(vector<TwoParamDataT>& dataToFill, vector<uint8_t>& buffer,
   }
   return true;
 }
-}
 
 // 0x535f5c in the avking.exe image
 static const uint8_t ENCRYPTION_KEY[] = {0xa9, 0xb3, 0xf2, 0x87, 0xdc, 0xaf,
                                          0x13, 0x67, 0xd5, 0x91, 0xec};
+}
 
 SCXFile::SCXFile()
     : scenes_(),
@@ -130,15 +176,17 @@ bool SCXFile::read(string fileName) {
   void* addr = region.get_address();
   size_t size = region.get_size();
 
-  vector<uint8_t> buffer(size);
-  memcpy(&buffer[0], addr, size);
+  // TODO: Consider boost::asio::buffer for this instead
+  vector<uint8_t> buffer(reinterpret_cast<uint8_t*>(addr),
+                         reinterpret_cast<uint8_t*>(addr) + size);
 
-  if (memcmp(&buffer[0], "scx\0", 4)) {
+  SCXFileIdentifier ident = get<SCXFileIdentifier>(buffer);
+
+  if (memcmp(&ident.fileprefix, "scx\0", 4)) {
     return false;
   }
 
   // Routine at 0x4352a0 in the binary does the checksum and decrypting
-  uint32_t* pChecksum = reinterpret_cast<uint32_t*>(&buffer[4]);
   uint32_t calc = 0;
   for (size_t i = 8; i < buffer.size(); ++i) {
     // Checksum
@@ -150,62 +198,44 @@ bool SCXFile::read(string fileName) {
     buffer[i] ^= key;
   }
 
-  if (calc != *pChecksum) {
+  if (calc != ident.checksum) {
     return false;
   }
 
-  /*
-  http://stackoverflow.com/questions/2079912/simpler-way-to-create-a-c-memorystream-from-char-size-t-without-copying-t
-  */
+  // For now, we're copying data, to avoid alignment issues
+  SCXFileHeader header = get<SCXFileHeader>(buffer);
 
-  // Is there a better way to do this?
-  uint32_t data;
-
-  buffcopy(data, buffer, 0x08);
-  scenes_.resize(data);
-  buffcopy(data, buffer, 0x0c);
-  table1_.resize(data);
-  buffcopy(data, buffer, 0x10);
-  memcpy(&data, &buffer[0x10], sizeof(data));
-  variables_.resize(data);
-  buffcopy(data, buffer, 0x14);
-  bg_names_.resize(data);
-  buffcopy(data, buffer, 0x18);
-  chr_names_.resize(data);
-  buffcopy(data, buffer, 0x1c);
-  se_names_.resize(data);
-  buffcopy(data, buffer, 0x20);
-  bgm_names_.resize(data);
-  buffcopy(data, buffer, 0x24);
-  voice_names_.resize(data);
+  scenes_.resize(header.scene_count);
+  table1_.resize(header.table1_count);
+  variables_.resize(header.variable_count);
+  bg_names_.resize(header.BG_count);
+  chr_names_.resize(header.CHR_count);
+  se_names_.resize(header.SE_count);
+  bgm_names_.resize(header.BGM_count);
+  voice_names_.resize(header.VOICE_count);
 
   // These are offsets to tables of fixed-size string data
-  buffcopy(data, buffer, 0x28);
-  uint32_t table1_strings_offset = data;
-  buffcopy(data, buffer, 0x2c);
-  uint32_t variable_strings_offset = data;
-  buffcopy(data, buffer, 0x30);
-  uint32_t bg_strings_offset = data;
-  buffcopy(data, buffer, 0x34);
-  uint32_t chr_strings_offset = data;
-  buffcopy(data, buffer, 0x38);
-  uint32_t se_strings_offset = data;
-  buffcopy(data, buffer, 0x3c);
-  uint32_t bgm_strings_offset = data;
-  buffcopy(data, buffer, 0x40);
-  uint32_t voice_strings_offset = data;
+  uint32_t table1_strings_offset = header.table1_strings_offset;
+  uint32_t variable_strings_offset = header.variable_names_offset;
+  uint32_t bg_strings_offset = header.BG_names_offset;
+  uint32_t chr_strings_offset = header.CHR_names_offset;
+  uint32_t se_strings_offset = header.SE_names_offset;
+  uint32_t bgm_strings_offset = header.BGM_names_offset;
+  uint32_t voice_strings_offset = header.VOICE_names_offset;
 
   // This is a table of uint32 offsets to variable-sized string data
-  uint32_t scene_string_offsets = 0x44;
+  uint32_t scene_string_offsets = SCXFileHeader::offset + SCXFileHeader::size;
 
   // This is a table of 0xd8-byte scene blobs
   uint32_t scene_blobs_offset =
-      0x44 + 0x04 * static_cast<uint32_t>(scenes_.size());
+      scene_string_offsets + sizeof(uint32_t) * header.scene_count;
+  static const uint32_t scene_blob_size = 0xd8;
+
   // This is a table of 0xc-byte variable info blobs
   uint32_t variable_blobs_offset =
-      scene_blobs_offset + 0xd8 * static_cast<uint32_t>(scenes_.size());
+      scene_blobs_offset + scene_blob_size * header.scene_count;
 
-  if (!read_variable_data<0xd8>(scenes_, buffer, scene_string_offsets,
+  if (!read_variable_data<scene_blob_size>(scenes_, buffer, scene_string_offsets,
                                 scene_blobs_offset))
     return false;
 
