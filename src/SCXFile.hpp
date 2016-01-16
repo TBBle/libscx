@@ -10,7 +10,7 @@ class SCXFile {
  public:
   SCXFile();
 
-  bool read(std::string fileName);
+  bool read(const std::string& fileName);
 
   std::size_t scene_count() const { return scenes_.size(); }
   std::size_t table1_count() const { return table1_.size(); }

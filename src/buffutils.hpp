@@ -13,7 +13,7 @@ using std::uint8_t;
 
 namespace buffutils {
 
-using dynbuffer = gsl::span<uint8_t>;
+using dynbuffer = gsl::span<const gsl::byte>;
 
 // Some templates to make it easier and safer to deal with
 // moving raw data in and out of big buffers.

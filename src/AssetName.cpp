@@ -8,20 +8,15 @@ using std::array;
 
 #include <cstring>
 using std::memcpy;
-#include <cstdint>
-using std::uint8_t;
-#include <cstddef>
-using std::size_t;
 
-size_t AssetName::read_data(const uint8_t* pStringData) {
+void AssetName::read_data(fixed_string_span string0,
+                          fixed_string_span string1) {
   array<char, 0x21> buffer;
   buffer[0x20] = '\0';
 
-  memcpy(&buffer[0], pStringData, 0x20);
+  memcpy(&buffer[0], string0.data(), string0.size());
   name = to_utf<char>(&buffer[0], "windows-932");
 
-  memcpy(&buffer[0], pStringData + 0x20, 0x20);
+  memcpy(&buffer[0], string1.data(), string1.size());
   abbreviation = to_utf<char>(&buffer[0], "windows-932");
-
-  return 0x40;
 }

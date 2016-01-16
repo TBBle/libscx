@@ -3,13 +3,8 @@
 #include <boost/locale.hpp>
 using boost::locale::conv::to_utf;
 
-#include <array>
-using std::array;
 #include <string>
 using std::string;
-#include <utility>
-using std::pair;
-using std::make_pair;
 
 #include <cstddef>
 using std::size_t;
@@ -18,8 +13,7 @@ using std::uint8_t;
 
 #include "buffutils.hpp"
 
-size_t Scene::read_data(gsl::czstring<> cp932text,
-                        gsl::span<uint8_t, 0xd8> data) {
+void Scene::read_data(gsl::czstring<> cp932text, blob_span data) {
   // String is null-terminated and encoded in Windows code-page 932, which
   // is known as "Shift_JIS" only within the MS API, and as "CP932" everywhere
   // except non-Windows ICU. msys2's mingw64 build of boost appears to be
@@ -67,6 +61,4 @@ size_t Scene::read_data(gsl::czstring<> cp932text,
   buffutils::copy(data, 116, sceneJumpInfo3);
   buffutils::copy(data, 164, sceneJumpInfo3);
   unk3 = buffutils::get<uint16_t>(data, 212);
-
-  return cp932text ? cp932data.size() + 1 : 0;
 }

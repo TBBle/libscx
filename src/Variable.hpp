@@ -3,11 +3,18 @@
 
 #include <cstdint>
 
+#include <gsl.h>
+
 struct Variable {
  public:
-  // Reading API: Returns how much was read from the two pointers supplied
-  std::pair<std::size_t, std::size_t> read_data(const std::uint8_t* pStringData,
-                                                const std::uint8_t* pBlobData);
+  static const std::uint32_t blob_size = 0xc;
+
+  // Reading API
+  using fixed_string_span = gsl::span<const gsl::byte, 0x20>;
+  using blob_span = gsl::span<const gsl::byte, blob_size>;
+  void read_data(fixed_string_span string0, fixed_string_span string1,
+                 blob_span data);
+
   // Writing API
   // Writes 0x40 bytes to pStringData, and 0xc bytes at pBlobData
   std::size_t write_data(std::uint8_t* pStringData,
@@ -15,5 +22,5 @@ struct Variable {
   // utf-8 encoded
   std::string name;
   std::string comment;
-  std::array<std::uint8_t, 0xc> info_blob;
+  std::array<gsl::byte, 0xc> info_blob;
 };

@@ -1,6 +1,5 @@
 #include <array>
 #include <string>
-#include <utility>
 
 #include <cstdint>
 
@@ -8,10 +7,12 @@
 
 struct Scene {
  public:
+  static const uint32_t blob_size = 0xd8;
+
   // Reading API
-  // Returns the number of bytes read from the string, including the terminating
-  // '\0'
-  size_t read_data(gsl::czstring<> cp932text, gsl::span<uint8_t, 0xd8> data);
+  using blob_span = gsl::span<const gsl::byte, blob_size>;
+  void read_data(gsl::czstring<> cp932text, blob_span data);
+
   // Writing API: Not ready yet.
   std::size_t stringSize() const;
   std::size_t write_data(std::uint8_t* pStringData,

@@ -3,31 +3,26 @@
 #include <boost/locale.hpp>
 using boost::locale::conv::to_utf;
 
+#include <algorithm>
+using std::copy;
 #include <array>
 using std::array;
-#include <utility>
-using std::pair;
-using std::make_pair;
 
-#include <cstddef>
-using std::size_t;
+#include <cassert>
 #include <cstring>
 using std::memcpy;
-#include <cstdint>
-using std::uint8_t;
 
-pair<size_t, size_t> Variable::read_data(const uint8_t* pStringData,
-                                         const uint8_t* pBlobData) {
+void Variable::read_data(fixed_string_span string0, fixed_string_span string1,
+                         blob_span data) {
   array<char, 0x21> buffer;
   buffer[0x20] = '\0';
 
-  memcpy(&buffer[0], pStringData, 0x20);
+  memcpy(&buffer[0], string0.data(), string0.size());
   comment = to_utf<char>(&buffer[0], "windows-932");
 
-  memcpy(&buffer[0], pStringData + 0x20, 0x20);
+  memcpy(&buffer[0], string1.data(), string1.size());
   name = to_utf<char>(&buffer[0], "windows-932");
 
-  memcpy(&info_blob[0], pBlobData, 0x0c);
-
-  return make_pair(0x40, 0xc);
+  assert(data.size() == info_blob.size());
+  copy(data.begin(), data.end(), info_blob.begin());
 }

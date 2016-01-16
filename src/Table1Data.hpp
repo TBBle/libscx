@@ -2,10 +2,14 @@
 
 #include <cstdint>
 
+#include <gsl.h>
+
 struct Table1Data {
  public:
   // Reading API
-  std::size_t read_data(const std::uint8_t* pStringData);
+  using fixed_string_span = gsl::span<const gsl::byte, 0x20>;
+  void read_data(fixed_string_span string);
+
   // Writing API
   // Writes 0x20 bytes to pStringData
   void write_data(std::uint8_t* pStringData) const;
