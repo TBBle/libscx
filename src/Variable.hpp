@@ -22,5 +22,5 @@ struct Variable {
   // utf-8 encoded
   std::string name;
   std::string comment;
-  std::array<gsl::byte, 0xc> info_blob;
+  std::array<gsl::byte, blob_size> info_blob;
 };
