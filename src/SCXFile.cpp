@@ -42,7 +42,7 @@ struct SCXFileIdentifier {
 static_assert(sizeof(SCXFileIdentifier) == SCXFileIdentifier::size,
               "SCXFileIdentifier did not pack correctly");
 
-// All following data is encrupted
+// All following data is encrypted
 struct SCXFileHeader {
   const static size_t size = 0x3c;
   const static size_t offset = 0x08;
