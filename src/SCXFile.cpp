@@ -70,13 +70,6 @@ struct SCXFileHeader {
 static_assert(sizeof(SCXFileHeader) == SCXFileHeader::size,
               "SCXFileHeader did not pack correctly");
 
-template <typename ObjectType>
-auto extract_buffers(const span<const byte>& buffer, size_t offset,
-                     size_t count) -> auto {
-  return as_span<ObjectType>(
-      buffer.subspan(offset, count * sizeof(ObjectType)));
-}
-
 using scene_blobs_span = span<const byte, dynamic_range, Scene::blob_size>;
 
 void read_scene_data(vector<Scene>& scene_data, scene_blobs_span scene_blobs,
