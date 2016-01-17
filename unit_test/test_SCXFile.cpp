@@ -4,11 +4,18 @@
 
 #include "scx.hpp"
 
+#include <array>
+using std::array;
 #include <string>
 using std::string;
 
-#include <cstring>
-using std::memcmp;
+#include <cstdint>
+using std::uint8_t;
+
+#include <gsl.h>
+using gsl::as_bytes;
+using gsl::as_span;
+using gsl::byte;
 
 TEST_CASE("Load the original avking SCX file") {
   SCXFile scxfile;
@@ -33,11 +40,12 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(scxfile.bgm_count() == 33);
   REQUIRE(scxfile.voice_count() == 24454);
 
-  const uint8_t nullSceneBlob[] = {
+  const array<uint8_t, Scene::scene_jump_blob_size> nullSceneBlob = {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  auto nullSceneBytes = as_bytes(as_span(nullSceneBlob));
 
   const Scene& scene0 = scxfile.scene(0);
   REQUIRE(scene0.text == u8"");
@@ -48,13 +56,13 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(scene0.unk2 == 0xffff);
   REQUIRE(scene0.chapterJump == 0xffff);
   REQUIRE(scene0.sceneJump1 == 0xffff);
-  REQUIRE(memcmp(&scene0.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene0.sceneJumpInfo1) == nullSceneBytes);
   REQUIRE(scene0.sceneJump2 == 0xffff);
-  REQUIRE(memcmp(&scene0.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene0.sceneJumpInfo2) == nullSceneBytes);
   REQUIRE(scene0.sceneJump3 == 0xffff);
-  REQUIRE(memcmp(&scene0.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene0.sceneJumpInfo3) == nullSceneBytes);
   REQUIRE(scene0.sceneJump4 == 25);
-  REQUIRE(memcmp(&scene0.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene0.sceneJumpInfo4) == nullSceneBytes);
   REQUIRE(scene0.unk3 == 0x00000000);
 
   const Scene& scene1 = scxfile.scene(1);
@@ -66,13 +74,13 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(scene1.unk2 == 0xffff);
   REQUIRE(scene1.chapterJump == 0xffff);
   REQUIRE(scene1.sceneJump1 == 0xffff);
-  REQUIRE(memcmp(&scene1.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene1.sceneJumpInfo1) == nullSceneBytes);
   REQUIRE(scene1.sceneJump2 == 0xffff);
-  REQUIRE(memcmp(&scene1.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene1.sceneJumpInfo2) == nullSceneBytes);
   REQUIRE(scene1.sceneJump3 == 16);
-  REQUIRE(memcmp(&scene1.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene1.sceneJumpInfo3) == nullSceneBytes);
   REQUIRE(scene1.sceneJump4 == 0xffff);
-  REQUIRE(memcmp(&scene1.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene1.sceneJumpInfo4) == nullSceneBytes);
   REQUIRE(scene1.unk3 == 0x00000000);
 
   const Scene& scene14500 = scxfile.scene(14500);
@@ -116,13 +124,13 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(scene14500.unk2 == 0xffff);
   REQUIRE(scene14500.chapterJump == 0xffff);
   REQUIRE(scene14500.sceneJump1 == 0xffff);
-  REQUIRE(memcmp(&scene14500.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene14500.sceneJumpInfo1) == nullSceneBytes);
   REQUIRE(scene14500.sceneJump2 == 0xffff);
-  REQUIRE(memcmp(&scene14500.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene14500.sceneJumpInfo2) == nullSceneBytes);
   REQUIRE(scene14500.sceneJump3 == 2);
-  REQUIRE(memcmp(&scene14500.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene14500.sceneJumpInfo3) == nullSceneBytes);
   REQUIRE(scene14500.sceneJump4 == 0xffff);
-  REQUIRE(memcmp(&scene14500.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene14500.sceneJumpInfo4) == nullSceneBytes);
   REQUIRE(scene14500.unk3 == 0x00000000);
 
   const Scene& scene16912 = scxfile.scene(16912);
@@ -134,13 +142,13 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(scene16912.unk2 == 0xffff);
   REQUIRE(scene16912.chapterJump == 0xffff);
   REQUIRE(scene16912.sceneJump1 == 0xffff);
-  REQUIRE(memcmp(&scene16912.sceneJumpInfo1[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene16912.sceneJumpInfo1) == nullSceneBytes);
   REQUIRE(scene16912.sceneJump2 == 32);
-  REQUIRE(memcmp(&scene16912.sceneJumpInfo2[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene16912.sceneJumpInfo2) == nullSceneBytes);
   REQUIRE(scene16912.sceneJump3 == 0xffff);
-  REQUIRE(memcmp(&scene16912.sceneJumpInfo3[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene16912.sceneJumpInfo3) == nullSceneBytes);
   REQUIRE(scene16912.sceneJump4 == 0xffff);
-  REQUIRE(memcmp(&scene16912.sceneJumpInfo4[0], nullSceneBlob, 0x30) == 0);
+  REQUIRE(as_span(scene16912.sceneJumpInfo4) == nullSceneBytes);
   REQUIRE(scene16912.unk3 == 0x00000000);
 
   const Table1Data& table1_0 = scxfile.table1(0);
@@ -165,8 +173,9 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(bg552.abbreviation == u8"");
 
   const Variable& var0 = scxfile.variable(0);
-  const uint8_t var0Blob[] = {0x10, 0x00, 0x32, 0x00, 0x32, 0x00,
-                              0x00, 0x00, 0x64, 0x00, 0xff, 0xff};
+  const array<uint8_t, Variable::blob_size> var0Blob = {
+      0x10, 0x00, 0x32, 0x00, 0x32, 0x00, 0x00, 0x00, 0x64, 0x00, 0xff, 0xff};
+  auto var0Bytes = as_bytes(as_span(var0Blob));
 
   REQUIRE(var0.name == u8"撮影モード終了時");
   REQUIRE(var0.comment == u8"");
@@ -184,17 +193,18 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(var0.info_blob[0xa] == 0xff);
   REQUIRE(var0.info_blob[0xb] == 0xff);
   */
-  REQUIRE(memcmp(&var0.info_blob[0], var0Blob, 0x0c) == 0);
+  REQUIRE(as_span(var0.info_blob) == var0Bytes);
 
   const Variable& var1 = scxfile.variable(1);
-  const uint8_t var1Blob[] = {0x10, 0x00, 0x64, 0x00, 0x64, 0x00,
-                              0x00, 0x00, 0x30, 0x75, 0xff, 0xff};
+  const array<uint8_t, Variable::blob_size> var1Blob = {
+      0x10, 0x00, 0x64, 0x00, 0x64, 0x00, 0x00, 0x00, 0x30, 0x75, 0xff, 0xff};
+  auto var1Bytes = as_bytes(as_span(var1Blob));
 
   // TODO: Check a string with the character U+2170 SMALL ROMAN NUMERAL ONE
   // which is in the data as FA 40
   REQUIRE(var1.name == u8"基本ステータス・所持金");
   REQUIRE(var1.comment == u8"");
-  REQUIRE(memcmp(&var1.info_blob[0], var1Blob, 0x0c) == 0);
+  REQUIRE(as_span(var1.info_blob) == var1Bytes);
 
   const Variable& var283 = scxfile.variable(283);
   REQUIRE(var283.name == u8"ＴＣ・卑語・レッスン回数");
