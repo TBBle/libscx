@@ -47,21 +47,20 @@ struct SCXFileHeader {
   const static size_t size = 0x3c;
   const static size_t offset = 0x08;
 
+  enum fixed_strings : size_t {
+    table1,
+    variable,
+    BG,
+    CHR,
+    SE,
+    BGM,
+    VOICE,
+    COUNT,
+  };
+
   uint32_t scene_count;
-  uint32_t table1_count;
-  uint32_t variable_count;
-  uint32_t BG_count;
-  uint32_t CHR_count;
-  uint32_t SE_count;
-  uint32_t BGM_count;
-  uint32_t VOICE_count;
-  uint32_t table1_strings_offset;
-  uint32_t variable_names_offset;
-  uint32_t BG_names_offset;
-  uint32_t CHR_names_offset;
-  uint32_t SE_names_offset;
-  uint32_t BGM_names_offset;
-  uint32_t VOICE_names_offset;
+  std::array<uint32_t, COUNT> counts;
+  std::array<uint32_t, COUNT> offsets;
 };
 
 static_assert(sizeof(SCXFileHeader) == SCXFileHeader::size,
@@ -235,9 +234,9 @@ bool SCXFile::read(const string& fileName) {
   buffer = buffer.subspan(scene_blobs.size_bytes());
 
   // Extract and advance past an array of 0xc-byte data structures
-  variable_blobs_span variable_blobs =
-      as_span(buffer.first(Variable::blob_size * header.variable_count),
-              dim<>(header.variable_count), dim<Variable::blob_size>());
+  variable_blobs_span variable_blobs = as_span(
+      buffer.first(Variable::blob_size * header.counts[header.variable]),
+      dim<>(header.counts[header.variable]), dim<Variable::blob_size>());
   buffer = buffer.subspan(variable_blobs.size_bytes());
 
   // All offsets are relative to the whole file
@@ -248,27 +247,27 @@ bool SCXFile::read(const string& fileName) {
 
   // A fixed string per table1 entry
   fixed_strings_span table1_string_buffers =
-      as_span(buffer.subspan(header.table1_strings_offset,
-                             fixed_string_size * header.table1_count),
-              dim<>(header.table1_count), dim<fixed_string_size>());
+      as_span(buffer.subspan(header.offsets[header.table1],
+                             fixed_string_size * header.counts[header.table1]),
+              dim<>(header.counts[header.table1]), dim<fixed_string_size>());
   read_table1_data(table1_, table1_string_buffers);
 
   // A blob and a pair of fixed strings per variable
-  fixed_string_pairs_span variable_strings_buffers =
-      as_span(buffer.subspan(header.variable_names_offset,
-                             fixed_string_size * 2 * header.variable_count),
-              dim<>(header.variable_count), dim<2>(), dim<fixed_string_size>());
+  fixed_string_pairs_span variable_strings_buffers = as_span(
+      buffer.subspan(header.offsets[header.variable],
+                     fixed_string_size * 2 * header.counts[header.variable]),
+      dim<>(header.counts[header.variable]), dim<2>(),
+      dim<fixed_string_size>());
   read_variable_data(variables_, variable_blobs, variable_strings_buffers);
 
 // Here on are all pairs of fixed strings
-#define READ_ASSET_STRINGS(ASSETTYPE, STORAGE)                              \
-  \
-fixed_string_pairs_span ASSETTYPE##_strings_buffers = as_span(              \
-      buffer.subspan(header.ASSETTYPE##_names_offset,                       \
-                     header.ASSETTYPE##_count * fixed_string_size * 2),     \
-      dim<>(header.ASSETTYPE##_count), dim<2>(), dim<fixed_string_size>()); \
-  \
-read_asset_strings(STORAGE, ASSETTYPE##_strings_buffers);
+#define READ_ASSET_STRINGS(ASSETTYPE, STORAGE)                                 \
+  fixed_string_pairs_span ASSETTYPE##_strings_buffers = as_span(               \
+      buffer.subspan(header.offsets[header.ASSETTYPE],                         \
+                     header.counts[header.ASSETTYPE] * fixed_string_size * 2), \
+      dim<>(header.counts[header.ASSETTYPE]), dim<2>(),                        \
+      dim<fixed_string_size>());                                               \
+  read_asset_strings(STORAGE, ASSETTYPE##_strings_buffers);
 
   READ_ASSET_STRINGS(BG, bg_names_);
   READ_ASSET_STRINGS(CHR, chr_names_);
