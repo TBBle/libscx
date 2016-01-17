@@ -8,10 +8,6 @@ using std::array;
 
 #include <cstring>
 using std::memcpy;
-#include <cstddef>
-using std::size_t;
-#include <cstdint>
-using std::uint8_t;
 
 void Table1Data::read_data(fixed_string_span string) {
   array<char, 0x21> buffer;

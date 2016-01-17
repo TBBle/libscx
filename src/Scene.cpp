@@ -9,8 +9,6 @@ using std::copy;
 #include <string>
 using std::string;
 
-#include <cstddef>
-using std::size_t;
 #include <cstdint>
 using std::uint8_t;
 

@@ -4,15 +4,12 @@
 using std::array;
 #include <string>
 using std::string;
-#include <utility>
-using std::make_pair;
 #include <vector>
 using std::vector;
 
 #include <cstddef>
 using std::size_t;
 #include <cstring>
-using std::memcpy;
 using std::memcmp;
 #include <cstdint>
 using std::uint8_t;
