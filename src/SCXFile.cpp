@@ -195,7 +195,7 @@ bool SCXFile::read(const string& fileName) {
 
   // Extract and advance past an SCXFileIdentifier
   const auto& ident =
-      as_span<SCXFileIdentifier>(buffer.first(sizeof(SCXFileIdentifier)))[0];
+      as_span<SCXFileIdentifier>(buffer.first<sizeof(SCXFileIdentifier)>())[0];
   buffer = buffer.subspan(sizeof(SCXFileIdentifier));
 
   if (memcmp(&ident.fileprefix, "scx\0", 4)) {
@@ -218,7 +218,7 @@ bool SCXFile::read(const string& fileName) {
 
   // Extract and advance past an SCXFileHeader
   const auto& header =
-      as_span<SCXFileHeader>(buffer.first(sizeof(SCXFileHeader)))[0];
+      as_span<SCXFileHeader>(buffer.first<sizeof(SCXFileHeader)>())[0];
   buffer = buffer.subspan(sizeof(SCXFileHeader));
 
   // Extract and advance past a table of uint32 offsets to variable-sized string

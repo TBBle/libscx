@@ -46,7 +46,8 @@ void Scene::read_data(gsl::czstring<> cp932text, blob_span data) {
   }
 
   // 10 x uint16_t, 8 known and two mystery
-  auto known = gsl::as_span<const uint16_t>(data.first(sizeof(uint16_t) * 10));
+  auto known =
+      gsl::as_span<const uint16_t>(data.first<sizeof(uint16_t) * 10>());
   auto buffer = data.subspan(known.size_bytes());
 
   chapter = known[0];
@@ -63,7 +64,7 @@ void Scene::read_data(gsl::czstring<> cp932text, blob_span data) {
   // 4 x 0x30 blobs of mystery
   using scene_jumps_span = gsl::span<const gsl::byte, 4, scene_jump_blob_size>;
   scene_jumps_span scene_jumps =
-      gsl::as_span(buffer.first(4 * scene_jump_blob_size), gsl::dim<4>(),
+      gsl::as_span(buffer.first<4 * scene_jump_blob_size>(), gsl::dim<4>(),
                    gsl::dim<scene_jump_blob_size>());
   buffer = buffer.subspan(scene_jumps.size_bytes());
 
