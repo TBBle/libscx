@@ -1486,7 +1486,7 @@ public:
     constexpr reference operator()(FirstIndex index, OtherIndices... indices)
     {
         index_type idx = {static_cast<std::ptrdiff_t>(index),
-                          static_cast<std::ptrdiff_t>(indices...)};
+                          static_cast<std::ptrdiff_t>(indices)...};
         return this->operator[](idx);
     }
 
