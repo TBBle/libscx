@@ -1666,7 +1666,7 @@ constexpr auto as_span(span<byte, Dimensions...> s) noexcept -> span<
     static_assert(
         std::is_trivial<std::decay_t<U>>::value &&
             (ByteSpan::bounds_type::static_size == dynamic_range ||
-             ByteSpan::bounds_type::static_size % static_cast<std::size_t>(sizeof(U)) == 0),
+             ByteSpan::bounds_type::static_size % static_cast<std::ptrdiff_t>(sizeof(U)) == 0),
         "Target type must be a trivial type and its size must match the byte array size");
 
     Expects((s.size_bytes() % sizeof(U)) == 0);
