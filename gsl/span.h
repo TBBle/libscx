@@ -334,7 +334,7 @@ namespace details
 
         size_type elementNum(size_t) const noexcept { return 0; }
 
-        size_type totalSize() const noexcept { return TotalSize; }
+        constexpr size_type totalSize() const noexcept { return TotalSize; }
 
         bool operator==(const BoundsRanges&) const noexcept { return true; }
     };
@@ -459,7 +459,7 @@ namespace details
             return this->Base::totalSize() * arr[Dim] + last;
         }
 
-        size_type totalSize() const noexcept { return CurrentRange * this->Base::totalSize(); }
+        constexpr size_type totalSize() const noexcept { return CurrentRange * this->Base::totalSize(); }
 
         size_type elementNum() const noexcept { return CurrentRange; }
 
