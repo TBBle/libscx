@@ -131,13 +131,13 @@ public:
         typename = std::enable_if_t<((sizeof...(Ts) + 1) == Rank) && std::is_integral<T>::value &&
                                     details::are_integral<Ts...>::value>>
     constexpr index(T t, Ts... ds)
-        : index({narrow_cast<value_type>(t), narrow_cast<value_type>(ds)...})
+        : index({static_cast<value_type>(t), static_cast<value_type>(ds)...})
     {
     }
 #else
     template <typename... Ts, typename = std::enable_if_t<(sizeof...(Ts) == Rank) &&
                                                           details::are_integral<Ts...>::value>>
-    constexpr index(Ts... ds) noexcept : elems{narrow_cast<value_type>(ds)...}
+    constexpr index(Ts... ds) noexcept : elems{static_cast<value_type>(ds)...}
     {
     }
 #endif
@@ -246,19 +246,19 @@ struct static_bounds_dynamic_range_t
     template <typename T, typename Dummy = std::enable_if_t<std::is_integral<T>::value>>
     constexpr operator T() const noexcept
     {
-        return narrow_cast<T>(-1);
+        return static_cast<T>(-1);
     }
 
     template <typename T, typename Dummy = std::enable_if_t<std::is_integral<T>::value>>
     constexpr bool operator==(T other) const noexcept
     {
-        return narrow_cast<T>(-1) == other;
+        return static_cast<T>(-1) == other;
     }
 
     template <typename T, typename Dummy = std::enable_if_t<std::is_integral<T>::value>>
     constexpr bool operator!=(T other) const noexcept
     {
-        return narrow_cast<T>(-1) != other;
+        return static_cast<T>(-1) != other;
     }
 };
 
@@ -677,7 +677,7 @@ public:
     {
         static_assert(std::is_integral<IntType>::value,
                       "Dimension parameter must be supplied as an integral type.");
-        auto real_dim = narrow_cast<size_t>(dim);
+        auto real_dim = static_cast<size_t>(dim);
         Expects(real_dim < rank);
 
         return m_ranges.elementNum(real_dim);
@@ -1134,7 +1134,7 @@ namespace details
     template <typename T, typename... Args>
     T static_as_span_helper(Sep, Args... args)
     {
-        return T{narrow_cast<typename T::size_type>(args)...};
+        return T{static_cast<typename T::size_type>(args)...};
     }
     template <typename T, typename Arg, typename... Args>
     std::enable_if_t<
@@ -1331,7 +1331,7 @@ public:
                                DataType>::value>>
     constexpr span(Cont& cont)
         : span(static_cast<pointer>(cont.data()),
-               details::newBoundsHelper<bounds_type>(narrow_cast<size_type>(cont.size())))
+               details::newBoundsHelper<bounds_type>(static_cast<size_type>(cont.size())))
     {
     }
 
@@ -1479,14 +1479,14 @@ public:
     template <typename FirstIndex>
     constexpr reference operator()(FirstIndex index)
     {
-        return this->operator[](narrow_cast<std::ptrdiff_t>(index));
+        return this->operator[](static_cast<std::ptrdiff_t>(index));
     }
 
     template <typename FirstIndex, typename... OtherIndices>
     constexpr reference operator()(FirstIndex index, OtherIndices... indices)
     {
-        index_type idx = {narrow_cast<std::ptrdiff_t>(index),
-                          narrow_cast<std::ptrdiff_t>(indices...)};
+        index_type idx = {static_cast<std::ptrdiff_t>(index),
+                          static_cast<std::ptrdiff_t>(indices...)};
         return this->operator[](idx);
     }
 
@@ -1647,7 +1647,7 @@ constexpr auto as_span(span<const byte, Dimensions...> s) noexcept
 
     Expects((s.size_bytes() % sizeof(U)) == 0 && (s.size_bytes() / sizeof(U)) < PTRDIFF_MAX);
     return {reinterpret_cast<const U*>(s.data()),
-            s.size_bytes() / narrow_cast<std::ptrdiff_t>(sizeof(U))};
+            s.size_bytes() / static_cast<std::ptrdiff_t>(sizeof(U))};
 }
 
 // convert a span<byte> to a span<T>
@@ -1656,7 +1656,7 @@ constexpr auto as_span(span<const byte, Dimensions...> s) noexcept
 // to the standard GSL interface.
 template <typename U, std::ptrdiff_t... Dimensions>
 constexpr auto as_span(span<byte, Dimensions...> s) noexcept -> span<
-    U, narrow_cast<std::ptrdiff_t>(
+    U, static_cast<std::ptrdiff_t>(
            span<byte, Dimensions...>::bounds_type::static_size != dynamic_range
                ? static_cast<std::size_t>(span<byte, Dimensions...>::bounds_type::static_size) /
                      sizeof(U)
@@ -1671,7 +1671,7 @@ constexpr auto as_span(span<byte, Dimensions...> s) noexcept -> span<
 
     Expects((s.size_bytes() % sizeof(U)) == 0);
     return {reinterpret_cast<U*>(s.data()),
-            s.size_bytes() / narrow_cast<std::ptrdiff_t>(sizeof(U))};
+            s.size_bytes() / static_cast<std::ptrdiff_t>(sizeof(U))};
 }
 
 template <typename T, std::ptrdiff_t... Dimensions>
@@ -1722,7 +1722,7 @@ constexpr auto as_span(Cont& arr) -> std::enable_if_t<
     span<std::remove_reference_t<decltype(arr.size(), *arr.data())>, dynamic_range>>
 {
     Expects(arr.size() < PTRDIFF_MAX);
-    return {arr.data(), narrow_cast<std::ptrdiff_t>(arr.size())};
+    return {arr.data(), static_cast<std::ptrdiff_t>(arr.size())};
 }
 
 template <typename Cont>
@@ -1736,7 +1736,7 @@ constexpr auto as_span(std::basic_string<CharT, Traits, Allocator>& str)
     -> span<CharT, dynamic_range>
 {
     Expects(str.size() < PTRDIFF_MAX);
-    return {&str[0], narrow_cast<std::ptrdiff_t>(str.size())};
+    return {&str[0], static_cast<std::ptrdiff_t>(str.size())};
 }
 
 // strided_span is an extension that is not strictly part of the GSL at this time.
@@ -1815,7 +1815,7 @@ public:
         static_assert((sizeof(OtherValueType) >= sizeof(value_type)) &&
                           (sizeof(OtherValueType) % sizeof(value_type) == 0),
                       "OtherValueType should have a size to contain a multiple of ValueTypes");
-        auto d = narrow_cast<size_type>(sizeof(OtherValueType) / sizeof(value_type));
+        auto d = static_cast<size_type>(sizeof(OtherValueType) / sizeof(value_type));
 
         size_type size = this->bounds().total_size() / d;
         return {const_cast<OtherValueType*>(reinterpret_cast<const OtherValueType*>(this->data())), size,
