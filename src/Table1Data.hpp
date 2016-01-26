@@ -11,8 +11,9 @@ struct Table1Data {
   void read_data(fixed_string_span string);
 
   // Writing API
-  // Writes 0x20 bytes to pStringData
-  void write_data(std::uint8_t* pStringData) const;
+  using fixed_string_span_out = gsl::span<gsl::byte, 0x20>;
+  void write_data(fixed_string_span_out string) const;
+
   // utf-8 encoded, I have no idea what this class represents
   std::string data;
 };

@@ -16,9 +16,11 @@ struct Variable {
                  blob_span data);
 
   // Writing API
-  // Writes 0x40 bytes to pStringData, and 0xc bytes at pBlobData
-  std::size_t write_data(std::uint8_t* pStringData,
-                         std::uint8_t* pBlobData) const;
+  using fixed_string_span_out = gsl::span<gsl::byte, 0x20>;
+  using blob_span_out = gsl::span<gsl::byte, blob_size>;
+  void write_data(fixed_string_span_out string0, fixed_string_span_out string1,
+                  blob_span_out data) const;
+
   // utf-8 encoded
   std::string name;
   std::string comment;

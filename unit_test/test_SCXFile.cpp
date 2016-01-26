@@ -214,3 +214,9 @@ TEST_CASE("Load the original avking SCX file") {
   REQUIRE(var780.name == u8"システム・Ｑ＆Ａモード");
   REQUIRE(var780.comment == u8"");
 }
+
+TEST_CASE("Load the original avking SCX file and write it out again") {
+  SCXFile scxfile;
+  REQUIRE(scxfile.read("../../avking.scx") == true);
+  REQUIRE(scxfile.write("avking.scx.out") == true);
+}

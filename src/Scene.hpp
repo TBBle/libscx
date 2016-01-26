@@ -13,10 +13,9 @@ struct Scene {
   using blob_span = gsl::span<const gsl::byte, blob_size>;
   void read_data(gsl::czstring<> cp932text, blob_span data);
 
-  // Writing API: Not ready yet.
-  std::size_t stringSize() const;
-  std::size_t write_data(std::uint8_t* pStringData,
-                         std::uint8_t* pBlobData) const;
+  // Writing API
+  using blob_span_out = gsl::span<gsl::byte, blob_size>;
+  std::unique_ptr<std::string> write_data(blob_span_out data) const;
 
   static const size_t scene_jump_blob_size = 0x30;
   using scene_jump_blob = std::array<gsl::byte, scene_jump_blob_size>;

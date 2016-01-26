@@ -2,6 +2,7 @@
 
 #include <boost/locale.hpp>
 using boost::locale::conv::to_utf;
+using boost::locale::conv::from_utf;
 
 #include <algorithm>
 using std::copy;
@@ -69,18 +70,62 @@ void Scene::read_data(gsl::czstring<> cp932text, blob_span data) {
   buffer = buffer.subspan(scene_jumps.size_bytes());
 
   auto scene_jumps1 = scene_jumps[0];
-  copy(scene_jumps1.begin(), scene_jumps1.end(), sceneJumpInfo1.begin());
+  copy(scene_jumps1.cbegin(), scene_jumps1.cend(), sceneJumpInfo1.begin());
 
   auto scene_jumps2 = scene_jumps[1];
-  copy(scene_jumps2.begin(), scene_jumps2.end(), sceneJumpInfo2.begin());
+  copy(scene_jumps2.cbegin(), scene_jumps2.cend(), sceneJumpInfo2.begin());
 
   auto scene_jumps3 = scene_jumps[2];
-  copy(scene_jumps3.begin(), scene_jumps3.end(), sceneJumpInfo3.begin());
+  copy(scene_jumps3.cbegin(), scene_jumps3.cend(), sceneJumpInfo3.begin());
 
   auto scene_jumps4 = scene_jumps[3];
-  copy(scene_jumps4.begin(), scene_jumps4.end(), sceneJumpInfo4.begin());
+  copy(scene_jumps4.cbegin(), scene_jumps4.cend(), sceneJumpInfo4.begin());
 
   // A trailing uint16_t, also of mystery
   auto unknown = gsl::as_span<const uint16_t>(buffer);
   unk3 = unknown[0];
+}
+
+std::unique_ptr<std::string> Scene::write_data(blob_span_out data) const {
+  // See read_data
+  auto known = gsl::as_span<uint16_t>(data.first<sizeof(uint16_t) * 10>());
+  auto buffer = data.subspan(known.size_bytes());
+
+  known[0] = chapter;
+  known[1] = scene;
+  known[2] = command;
+  known[3] = unk1;
+  known[4] = unk2;
+  known[5] = chapterJump;
+  known[6] = sceneJump1;
+  known[7] = sceneJump2;
+  known[8] = sceneJump3;
+  known[9] = sceneJump4;
+
+  using scene_jumps_span = gsl::span<gsl::byte, 4, scene_jump_blob_size>;
+  scene_jumps_span scene_jumps =
+      gsl::as_span(buffer.first<4 * scene_jump_blob_size>(), gsl::dim<4>(),
+                   gsl::dim<scene_jump_blob_size>());
+  buffer = buffer.subspan(scene_jumps.size_bytes());
+
+  auto scene_jumps1 = scene_jumps[0];
+  copy(sceneJumpInfo1.cbegin(), sceneJumpInfo1.cend(), scene_jumps1.begin());
+
+  auto scene_jumps2 = scene_jumps[1];
+  copy(sceneJumpInfo2.cbegin(), sceneJumpInfo2.cend(), scene_jumps2.begin());
+
+  auto scene_jumps3 = scene_jumps[2];
+  copy(sceneJumpInfo3.cbegin(), sceneJumpInfo3.cend(), scene_jumps3.begin());
+
+  auto scene_jumps4 = scene_jumps[3];
+  copy(sceneJumpInfo4.cbegin(), sceneJumpInfo4.cend(), scene_jumps4.begin());
+
+  auto unknown = gsl::as_span<uint16_t>(buffer);
+  unknown[0] = unk3;
+
+  if (text.empty()) {
+    return nullptr;
+  }
+
+  return std::make_unique<string>(from_utf<char>(text, "windows-932"));
 }

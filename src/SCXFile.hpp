@@ -1,7 +1,7 @@
-#include "Table1Data.hpp"
-#include "Scene.hpp"
-#include "Variable.hpp"
 #include "AssetName.hpp"
+#include "Scene.hpp"
+#include "Table1Data.hpp"
+#include "Variable.hpp"
 
 #include <string>
 #include <vector>
@@ -11,6 +11,7 @@ class SCXFile {
   SCXFile();
 
   bool read(const std::string& fileName);
+  bool write(const std::string& fileName);
 
   std::size_t scene_count() const { return scenes_.size(); }
   std::size_t table1_count() const { return table1_.size(); }
