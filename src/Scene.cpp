@@ -48,7 +48,7 @@ void Scene::read_data(gsl::czstring<> cp932text, blob_span data) {
 
   // 10 x uint16_t, 8 known and two mystery
   auto known =
-      gsl::as_span<const uint16_t>(data.first<sizeof(uint16_t) * 10>());
+      gsl::as_multi_span<const uint16_t>(data.first<sizeof(uint16_t) * 10>());
   auto buffer = data.subspan(known.size_bytes());
 
   chapter = known[0];
@@ -63,10 +63,11 @@ void Scene::read_data(gsl::czstring<> cp932text, blob_span data) {
   sceneJump4 = known[9];
 
   // 4 x 0x30 blobs of mystery
-  using scene_jumps_span = gsl::span<const gsl::byte, 4, scene_jump_blob_size>;
+  using scene_jumps_span =
+      gsl::multi_span<const gsl::byte, 4, scene_jump_blob_size>;
   scene_jumps_span scene_jumps =
-      gsl::as_span(buffer.first<4 * scene_jump_blob_size>(), gsl::dim<4>(),
-                   gsl::dim<scene_jump_blob_size>());
+      gsl::as_multi_span(buffer.first<4 * scene_jump_blob_size>(),
+                         gsl::dim<4>(), gsl::dim<scene_jump_blob_size>());
   buffer = buffer.subspan(scene_jumps.size_bytes());
 
   auto scene_jumps1 = scene_jumps[0];
@@ -82,13 +83,14 @@ void Scene::read_data(gsl::czstring<> cp932text, blob_span data) {
   copy(scene_jumps4.cbegin(), scene_jumps4.cend(), sceneJumpInfo4.begin());
 
   // A trailing uint16_t, also of mystery
-  auto unknown = gsl::as_span<const uint16_t>(buffer);
+  auto unknown = gsl::as_multi_span<const uint16_t>(buffer);
   unk3 = unknown[0];
 }
 
 std::unique_ptr<std::string> Scene::write_data(blob_span_out data) const {
   // See read_data
-  auto known = gsl::as_span<uint16_t>(data.first<sizeof(uint16_t) * 10>());
+  auto known =
+      gsl::as_multi_span<uint16_t>(data.first<sizeof(uint16_t) * 10>());
   auto buffer = data.subspan(known.size_bytes());
 
   known[0] = chapter;
@@ -102,10 +104,10 @@ std::unique_ptr<std::string> Scene::write_data(blob_span_out data) const {
   known[8] = sceneJump3;
   known[9] = sceneJump4;
 
-  using scene_jumps_span = gsl::span<gsl::byte, 4, scene_jump_blob_size>;
+  using scene_jumps_span = gsl::multi_span<gsl::byte, 4, scene_jump_blob_size>;
   scene_jumps_span scene_jumps =
-      gsl::as_span(buffer.first<4 * scene_jump_blob_size>(), gsl::dim<4>(),
-                   gsl::dim<scene_jump_blob_size>());
+      gsl::as_multi_span(buffer.first<4 * scene_jump_blob_size>(),
+                         gsl::dim<4>(), gsl::dim<scene_jump_blob_size>());
   buffer = buffer.subspan(scene_jumps.size_bytes());
 
   auto scene_jumps1 = scene_jumps[0];
@@ -120,7 +122,7 @@ std::unique_ptr<std::string> Scene::write_data(blob_span_out data) const {
   auto scene_jumps4 = scene_jumps[3];
   copy(sceneJumpInfo4.cbegin(), sceneJumpInfo4.cend(), scene_jumps4.begin());
 
-  auto unknown = gsl::as_span<uint16_t>(buffer);
+  auto unknown = gsl::as_multi_span<uint16_t>(buffer);
   unknown[0] = unk3;
 
   if (text.empty()) {

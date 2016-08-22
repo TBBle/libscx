@@ -3,18 +3,18 @@
 
 #include <cstdint>
 
-#include <gsl.h>
+#include <gsl/gsl>
 
 struct Scene {
  public:
   static const uint32_t blob_size = 0xd8;
 
   // Reading API
-  using blob_span = gsl::span<const gsl::byte, blob_size>;
+  using blob_span = gsl::multi_span<const gsl::byte, blob_size>;
   void read_data(gsl::czstring<> cp932text, blob_span data);
 
   // Writing API
-  using blob_span_out = gsl::span<gsl::byte, blob_size>;
+  using blob_span_out = gsl::multi_span<gsl::byte, blob_size>;
   std::unique_ptr<std::string> write_data(blob_span_out data) const;
 
   static const size_t scene_jump_blob_size = 0x30;
