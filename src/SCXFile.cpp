@@ -275,7 +275,7 @@ null, x2)
   Looks like name then display-name?
 */
 
-bool SCXFile::read(const string& fileName) {
+bool SCXFile::read(const string& fileName) try {
   file_mapping file(fileName.c_str(), read_only);
   mapped_region region(file, read_only);
   void* addr = region.get_address();
@@ -378,6 +378,8 @@ bool SCXFile::read(const string& fileName) {
 #undef READ_ASSET_STRINGS
 
   return true;
+} catch (...) {
+  return false;
 }
 
 bool SCXFile::write(const string& fileName) {

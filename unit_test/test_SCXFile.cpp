@@ -17,6 +17,30 @@ using gsl::as_bytes;
 using gsl::as_multi_span;
 using gsl::byte;
 
+TEST_CASE("Load a non-existent file") {
+  SCXFile scxfile;
+
+  REQUIRE(scxfile.scene_count() == 0);
+  REQUIRE(scxfile.table1_count() == 0);
+  REQUIRE(scxfile.variable_count() == 0);
+  REQUIRE(scxfile.bg_count() == 0);
+  REQUIRE(scxfile.chr_count() == 0);
+  REQUIRE(scxfile.se_count() == 0);
+  REQUIRE(scxfile.bgm_count() == 0);
+  REQUIRE(scxfile.voice_count() == 0);
+
+  REQUIRE(scxfile.read("bananas.scx") == false);
+
+  REQUIRE(scxfile.scene_count() == 0);
+  REQUIRE(scxfile.table1_count() == 0);
+  REQUIRE(scxfile.variable_count() == 0);
+  REQUIRE(scxfile.bg_count() == 0);
+  REQUIRE(scxfile.chr_count() == 0);
+  REQUIRE(scxfile.se_count() == 0);
+  REQUIRE(scxfile.bgm_count() == 0);
+  REQUIRE(scxfile.voice_count() == 0);
+}
+
 TEST_CASE("Load the original avking SCX file") {
   SCXFile scxfile;
 
