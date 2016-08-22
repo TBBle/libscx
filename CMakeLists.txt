@@ -63,3 +63,15 @@ target_include_directories(test_scx PRIVATE catch)
 target_link_libraries(test_scx scx)
 
 add_test(test_scx test_scx)
+
+add_executable(export_variables
+	gettext_converter/export_variables.cpp
+)
+
+target_link_libraries(export_variables scx)
+
+add_executable(export_scenes
+	gettext_converter/export_scenes.cpp
+)
+
+target_link_libraries(export_scenes scx)
